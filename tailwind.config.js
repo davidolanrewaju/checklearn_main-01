@@ -1,11 +1,10 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-  ],
-  theme: {
-    extend: {},
+export const content = ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'];
+export const theme = {
+  fontFamily: {
+    lexend: ['"Lexend"', 'sans-serif'],
+    unbounded: ['"Unbounded"', 'sans-serif'],
+    montserrat: ['"Montserrat"', 'sans-serif'],
   },
-  plugins: [],
-}
+};
+export const plugins = [];
