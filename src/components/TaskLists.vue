@@ -128,7 +128,7 @@ const getTruncatedDescription = (description, showFull) => {
             {{ task.showFullDescription ? 'Show Less' : 'Show More' }}
           </button>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1 md:gap-3">
           <div
             @click="openEditModal(task)"
             class="w-8 h-8 flex items-center justify-center rounded-full p-5 hover:bg-gray-300 hover:bg-opacity-70 transition-all duration-300 ease-in-out transform"

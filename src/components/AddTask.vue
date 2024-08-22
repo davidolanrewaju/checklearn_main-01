@@ -48,7 +48,7 @@ function addTask(event) {
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-gray-100">
-    <main class="bg-white w-7/12 p-7 rounded-xl shadow-md">
+    <main class="bg-white w-full mx-3 md:mx-0 md:w-7/12 p-7 rounded-xl shadow-md">
       <div>
         <div class="flex items-center justify-between">
           <h1 class="font-unbounded font-bold text-2xl">Add Task</h1>

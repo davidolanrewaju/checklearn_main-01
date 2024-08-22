@@ -45,7 +45,7 @@ const submitForm = (e) => {
     v-if="isEditOpen"
     class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
   >
-    <div class="bg-white rounded-lg shadow-lg w-5/12 p-6 relative">
+    <div class="w-11/12 bg-white rounded-lg shadow-lg md:w-5/12 p-6 relative">
       <div class="flex items-center justify-between mb-4">
         <h2 class="text-2xl font-lexend font-semibold">Edit Task</h2>
         <button @click="closeEditModal" class="text-gray-400 hover:text-gray-600">
