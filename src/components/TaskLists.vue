@@ -109,8 +109,8 @@ const getTruncatedDescription = (description, showFull) => {
         <div
           @click="completeTask(task)"
           :class="[
-            'w-8 h-8 flex items-center justify-center rounded-full border-4 border-white cursor-pointer',
-            task.status === 'complete' ? 'bg-indigo-950 border-transparent' : '',
+            'w-8 h-8 flex items-center justify-center rounded-full border-4 cursor-pointer',
+            task.status === 'complete' ? 'bg-indigo-950 border-transparent' : 'border-white',
           ]"
         >
           <i :class="['pi text-sm', task.status === 'complete' ? 'pi-check text-white' : '']"></i>
