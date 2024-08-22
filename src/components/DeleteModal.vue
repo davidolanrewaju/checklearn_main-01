@@ -1,5 +1,6 @@
 <script setup>
 import { defineEmits } from 'vue';
+import { useToast } from 'vue-toastification';
 
 defineProps({
   isOpen: {
@@ -8,6 +9,7 @@ defineProps({
   },
 });
 
+const toast = useToast();
 const emit = defineEmits(['handleModal']);
 
 const closeModal = () => {
@@ -16,6 +18,7 @@ const closeModal = () => {
 
 const deleteTask = () => {
   emit('confirmDelete');
+  toast.success('Task deleted successfully');
 };
 </script>
 

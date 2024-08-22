@@ -5,7 +5,7 @@ import TaskLists from '@/components/TaskLists.vue';
 
 <template>
   <div class="min-h-screen flex items-center justify-center">
-    <main class="bg-white w-7/12 p-7 rounded-xl">
+    <main class="bg-white w-7/12 p-7 rounded-xl shadow-lg">
       <NavigationBar />
       <TaskLists />
     </main>
