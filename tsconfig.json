@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "allowJs": true,
+    "target": "ES2023",
+    "moduleResolution": "Bundler",
+    "skipLibCheck": true
+  }
+}
