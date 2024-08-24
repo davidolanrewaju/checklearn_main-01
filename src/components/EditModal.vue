@@ -36,6 +36,7 @@ const submitForm = (e) => {
       description: taskDescription.value.trim(),
     };
     emit('updateTask', updatedTask);
+    closeEditModal(); // Close the modal after the update
   }
 };
 </script>

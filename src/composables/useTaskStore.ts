@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue';
+import { ref, computed, Ref } from 'vue';
 
 interface Task {
   id: number;
@@ -6,21 +6,39 @@ interface Task {
   description: string;
   status: 'complete' | 'incomplete';
   createdAt: string;
-  showFullDescription?: boolean;
+  showFullDescription: boolean;
 }
 
-export function useTaskStore() {
+interface TaskStore {
+  tasks: Ref<Task[]>;
+  isLoading: Ref<boolean>;
+  loadTasks: () => void;
+  addTask: (newTask: Omit<Task, 'id' | 'createdAt' | 'status'>) => void;
+  updateTask: (updatedTask: Task) => void;
+  deleteTask: (taskId: number) => void;
+  completeTask: (taskId: number) => void;
+  filteredTasks: (searchTerm: string) => Task[];
+}
+
+export function useTaskStore(): TaskStore {
   const tasks = ref<Task[]>([]);
   const isLoading = ref(true);
 
   const loadTasks = () => {
-    const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-    tasks.value = storedTasks.map((task: Task) => ({
-      ...task,
-      showFullDescription: false,
-    }));
+    try {
+      const storedTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
+      tasks.value = storedTasks.map((task: Task) => ({
+        ...task,
+        showFullDescription: false,
+      }));
+    } catch (error) {
+      console.error('Error loading tasks:', error);
+      tasks.value = [];
+    }
     isLoading.value = false;
   };
+  
+  loadTasks();
 
   const addTask = (newTask: Omit<Task, 'id' | 'createdAt' | 'status'>) => {
     const task: Task = {
@@ -28,6 +46,7 @@ export function useTaskStore() {
       ...newTask,
       status: 'incomplete',
       createdAt: new Date().toISOString(),
+      showFullDescription: false,
     };
     tasks.value.push(task);
     saveTasks();
@@ -56,19 +75,22 @@ export function useTaskStore() {
   };
 
   const saveTasks = () => {
-    localStorage.setItem('tasks', JSON.stringify(tasks.value));
+    try {
+      localStorage.setItem('tasks', JSON.stringify(tasks.value));
+    } catch (error) {
+      console.error('Error saving tasks:', error);
+    }
   };
 
-  const filteredTasks = computed(() => {
-    return (searchTerm: string) => {
-      if (!searchTerm) return tasks.value;
-      return tasks.value.filter(
-        (task) =>
-          task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          (task.description && task.description.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    };
-  });
+  const filteredTasks = (searchTerm: string) => {
+    if (!searchTerm) return tasks.value;
+    return tasks.value.filter(
+      (task) =>
+        task.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (task.description &&
+          task.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+  };
 
   return {
     tasks,

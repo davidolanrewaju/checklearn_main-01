@@ -1,64 +1,38 @@
-<script setup>
-import { onMounted, reactive, ref, computed } from 'vue';
+<script setup lang="ts">
+import { ref, computed } from 'vue';
 import DeleteModal from '@/components/DeleteModal.vue';
 import EditModal from '@/components/EditModal.vue';
+import { useTaskStore } from '@/composables/useTaskStore';
+
+interface Task {
+  id: number;
+  name: string;
+  description: string;
+  status: 'complete' | 'incomplete';
+  showFullDescription?: boolean;
+}
 
 const searchTerm = ref('');
-const taskToEdit = ref(null);
+const taskToEdit = ref<Task | null>(null);
 const isEditModalOpen = ref(false);
 const isDeleteModalOpen = ref(false);
-const state = reactive({
-  tasks: [],
-  isLoading: true,
-  taskToDelete: null,
-});
+const taskToDelete = ref<Task | null>(null);
 
-onMounted(() => {
-  const tasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-  state.tasks = tasks.map((task) => ({
-    ...task,
-    showFullDescription: false,
-  }));
-  state.isLoading = false;
-});
+const { tasks, isLoading, updateTask, deleteTask, completeTask, filteredTasks } = useTaskStore();
 
-function deleteTask() {
-  if (state.taskToDelete) {
-    state.tasks = state.tasks.filter((task) => task.id !== state.taskToDelete.id);
-    localStorage.setItem('tasks', JSON.stringify(state.tasks));
-    closeDeleteModal();
-  }
-}
+const computedFilteredTasks = computed(() => filteredTasks(searchTerm.value));
 
-function completeTask(task) {
-  const index = state.tasks.findIndex((t) => t.id === task.id);
-  if (index !== -1) {
-    state.tasks[index].status =
-      state.tasks[index].status === 'complete' ? 'incomplete' : 'complete';
-    localStorage.setItem('tasks', JSON.stringify(state.tasks));
-  }
-}
-
-function updateTask(updatedTask) {
-  const index = state.tasks.findIndex((task) => task.id === updatedTask.id);
-  if (index !== -1) {
-    state.tasks[index] = { ...updatedTask, showFullDescription: false };
-    localStorage.setItem('tasks', JSON.stringify(state.tasks));
-  }
-  closeEditModal();
-}
-
-function openDeleteModal(task) {
-  state.taskToDelete = task;
+function openDeleteModal(task: Task) {
+  taskToDelete.value = task;
   isDeleteModalOpen.value = true;
 }
 
 function closeDeleteModal() {
-  state.taskToDelete = null;
+  taskToDelete.value = null;
   isDeleteModalOpen.value = false;
 }
 
-function openEditModal(task) {
+function openEditModal(task: Task) {
   taskToEdit.value = task;
   isEditModalOpen.value = true;
 }
@@ -68,20 +42,18 @@ function closeEditModal() {
   isEditModalOpen.value = false;
 }
 
-const filteredTasks = computed(() => {
-  if (!searchTerm.value) return state.tasks;
-  return state.tasks.filter(
-    (task) =>
-      task.name.toLowerCase().includes(searchTerm.value.toLowerCase()) ||
-      (task.description && task.description.toLowerCase().includes(searchTerm.value.toLowerCase()))
-  );
-});
+function handleDeleteTask() {
+  if (taskToDelete.value) {
+    deleteTask(taskToDelete.value.id); // Ensure deleteTask is passed the correct ID
+    closeDeleteModal();
+  }
+}
 
-const toggleFullDescription = (task) => {
+const toggleFullDescription = (task: Task) => {
   task.showFullDescription = !task.showFullDescription;
 };
 
-const getTruncatedDescription = (description, showFull) => {
+const getTruncatedDescription = (description: string, showFull: boolean | undefined) => {
   if (!description) return '';
   if (!showFull && description.length > 30) {
     return description.substring(0, 30) + '...';
@@ -91,7 +63,7 @@ const getTruncatedDescription = (description, showFull) => {
 </script>
 
 <template>
-  <div v-if="state.isLoading" class="font-montserrat">Loading...</div>
+  <div v-if="isLoading" class="font-montserrat">Loading...</div>
   <div v-else class="mt-7">
     <input
       v-model="searchTerm"
@@ -101,24 +73,32 @@ const getTruncatedDescription = (description, showFull) => {
     />
 
     <div
-      v-for="task in filteredTasks"
+      v-for="task in computedFilteredTasks"
       :key="task.id"
       class="flex shadow-lg items-center gap-5 mt-4 p-4 bg-indigo-500 rounded-md hover:bg-indigo-400 cursor-pointer transition-all duration-500 ease-in-out transform"
     >
       <div class="flex items-center gap-5 w-full">
         <div
-          @click="completeTask(task)"
+          @click="completeTask(task.id)"
           :class="[
             'w-8 h-8 flex items-center justify-center rounded-full border-4 cursor-pointer',
             task.status === 'complete' ? 'bg-indigo-950 border-transparent' : 'border-white',
           ]"
+          aria-label="Toggle task completion"
         >
           <i :class="['pi text-sm', task.status === 'complete' ? 'pi-check text-white' : '']"></i>
         </div>
         <div class="flex-grow">
-          <p class="text-white font-lexend text-lg">{{ task.name }}</p>
+          <p
+            :class="[
+              'text-white font-lexend text-lg',
+              task.status === 'complete' ? 'line-through' : '',
+            ]"
+          >
+            {{ task.name }}
+          </p>
           <p v-if="task.description" class="text-white italic text-sm">
-            {{ getTruncatedDescription(task.description, task.showFullDescription) }}
+            {{ getTruncatedDescription(task.description, task.showFullDescription ?? false) }}
           </p>
           <button
             v-if="task.description && task.description.length > 30"
@@ -148,9 +128,10 @@ const getTruncatedDescription = (description, showFull) => {
 
   <DeleteModal
     :isOpen="isDeleteModalOpen"
-    @confirmDelete="deleteTask"
+    @confirmDelete="handleDeleteTask"
     @handleModal="closeDeleteModal"
   />
+
   <EditModal
     :isEditOpen="isEditModalOpen"
     :taskToEdit="taskToEdit"
