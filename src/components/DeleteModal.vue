@@ -3,14 +3,11 @@ import { defineEmits } from 'vue';
 import { useToast } from 'vue-toastification';
 
 defineProps({
-  isOpen: {
-    type: Boolean,
-    default: false,
-  },
+  isOpen: Boolean,
 });
 
 const toast = useToast();
-const emit = defineEmits(['handleModal']);
+const emit = defineEmits(['handleModal', 'confirmDelete']);
 
 const closeModal = () => {
   emit('handleModal', false);

@@ -1,45 +1,40 @@
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import { useToast } from 'vue-toastification';
+import { useTaskStore } from '@/composables/useTaskStore';
+
+interface TaskForm {
+  taskName: string;
+  taskDescription: string;
+}
 
 const router = useRouter();
 const toast = useToast();
+const { addTask } = useTaskStore();
 
-const task = reactive({
+const task = reactive<TaskForm>({
   taskName: '',
   taskDescription: '',
 });
 const errorMessage = ref('');
 
-function addTask(event) {
-  event.preventDefault();
-
+function handleAddTask() {
   if (task.taskName.trim() === '') {
     errorMessage.value = 'Task name cannot be empty';
     return;
   }
 
-  const newTask = {
-    id: Date.now(),
+  addTask({
     name: task.taskName,
     description: task.taskDescription,
-    status: 'incomplete',
-    createdAt: new Date().toISOString(),
-  };
+    showFullDescription: false
+  });
 
-  // Get existing tasks from localStorage
-  const existingTasks = JSON.parse(localStorage.getItem('tasks') || '[]');
-
-  // Add new task to the array
-  existingTasks.push(newTask);
-
-  // Save updated tasks back to localStorage
-  localStorage.setItem('tasks', JSON.stringify(existingTasks));
-
-  // Clear the form
+  // **Clear the form and reset the error message**
   task.taskName = '';
   task.taskDescription = '';
+  errorMessage.value = '';
 
   toast.success('Task added successfully!');
   router.push('/');
@@ -56,7 +51,7 @@ function addTask(event) {
         </div>
         <hr class="border-t border-gray-400 my-3" />
 
-        <form class="mt-9">
+        <form class="mt-9" @submit.prevent="handleAddTask">
           <div class="mb-4">
             <label for="taskName" class="block font-montserrat font-semibold text-gray-500">
               Task Name
@@ -85,7 +80,6 @@ function addTask(event) {
           <button
             type="submit"
             class="font-lexend border-2 border-indigo-500 text-indigo-500 font-bold py-2 px-4 rounded-md hover:border-transparent hover:bg-indigo-500 hover:text-white"
-            @click="addTask"
           >
             Add Task
           </button>
